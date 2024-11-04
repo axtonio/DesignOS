@@ -1,0 +1,7 @@
+terminal_app @ git+http://github.com/antonio-projects-studio/terminal_app
+flask
+flask[async]
+gunicorn
+swagger-ui-py
+apispec
+apispec[yaml]

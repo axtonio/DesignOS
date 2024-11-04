@@ -1,0 +1,22 @@
+- name: ping servers
+  hosts: all
+  become: false
+  tasks:
+    - name: ping all servers
+      ping:
+
+- name: app1 running
+  hosts: app1
+  become: true
+  gather_facts: false
+  tasks:
+    - name: run
+      raw: source entrypoint.sh
+
+- name: app2 running
+  hosts: app2
+  become: true
+  gather_facts: false
+  tasks:
+    - name: run
+      raw: source entrypoint.sh

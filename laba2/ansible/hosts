@@ -1,0 +1,2 @@
+app1 ansible_host=172.20.0.2 ansible_user=root ansible_pass=root
+app2 ansible_host=172.20.0.3 ansible_user=root ansible_pass=root

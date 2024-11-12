@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+
+  redis:
+    image: redis/redis-stack-server:latest
+    ports:
+      - "6382:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  postgres:
+    image: postgres
+    env_file:
+      - ./configs/production/.postgres.env
+    environment:
+      PGDATA: /data/postgres
+    volumes:
+      - postgres_data:/data/postgres
+    ports:
+      - 5434:5432
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  bot:
+    image: antonioprojects/tracker_demo_bot:latest
+    volumes:
+      - .:/backend
+    environment:
+      PROD: 1
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - redis
+      - postgres
+
+volumes:
+  redis_data:
+  postgres_data:

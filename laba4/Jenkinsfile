@@ -10,7 +10,6 @@ pipeline {
     environment {
         SONAR_PROJECT_KEY = 'java_app'
         SONAR_PROJECT_NAME = 'JAVA'
-        SONAR_HOST_URL = 'http://host.docker.internal:9000/'
         SONAR_LOGIN = credentials('sonar')
     }
 
@@ -74,7 +73,6 @@ pipeline {
                             mvn sonar:sonar \
                             -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                             -Dsonar.projectName=${SONAR_PROJECT_NAME} \
-                            -Dsonar.host.url=${SONAR_HOST_URL} \
                             -Dsonar.login=${SONAR_LOGIN}
                         '''
                     }

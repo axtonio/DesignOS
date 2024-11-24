@@ -17,32 +17,40 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                sh 'rm -rf java_app'
-                sh 'git clone https://github.com/antonio-projects-studio/java_app.git'
-            }
-        }
-        stage('Install libs') {
-            steps {
-                dir('java_app') {
-                    sh 'apt-get update'
-                    sh 'apt install -y maven'
+                script {
+                    sh 'rm -rf java_app'
+                    sh 'git clone https://github.com/antonio-projects-studio/java_app.git'
                 }
             }
         }
 
-        stage('Build') {
+        stage('Init libs') {
             steps {
                 dir('java_app') {
-                    sh 'mvn clean install -DskipTests'
+                    script {
+                        sh 'apt-get update'
+                        sh 'apt install -y maven'
+                    }
                 }
             }
         }
 
-        stage('Test') {
+        stage('Build App') {
             steps {
-                sh 'cd java_app'
                 dir('java_app') {
-                    sh 'mvn clean test'
+                    script {
+                        sh 'mvn clean install -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('Allure') {
+            steps {
+                dir('java_app') {
+                    script {
+                        sh 'mvn clean test'
+                    }
                 }
             }
             post {
@@ -58,7 +66,7 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('SonarQube') {
             steps {
                 dir('java_app') {
                     withSonarQubeEnv('SQ') {
@@ -73,25 +81,29 @@ pipeline {
                 }
             }
         }
-        stage('Install Docker') {
-            steps {
-                sh 'apt-get update'
-                sh 'apt-get install -y docker.io'
-                sh 'systemctl enable docker'
-                sh 'dockerd > /dev/null 2>&1 &'
 
+        stage('Init Docker') {
+            steps {
+                script {
+                    sh 'apt-get update'
+                    sh 'apt-get install -y docker.io'
+                    sh 'systemctl enable docker'
+                    sh 'dockerd > /dev/null 2>&1 &'
+                }
             }
         }
-        stage('Docker Build') {
+
+        stage('Build Docker Image') {
             steps {
-                dir('java_app'){
+                dir('java_app') {
                     script {
                         sh 'docker build -t antonioprojects/java_app:latest .'
                     }
                 }
             }
         }
-        stage('Docker Push') {
+
+        stage('Push Docker Image') {
             steps {
                 dir('java_app') {
                     script {

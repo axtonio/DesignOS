@@ -1,0 +1,117 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'MVN'
+        jdk 'JDK'
+        allure 'ALR'
+    }
+
+    environment {
+        SONAR_PROJECT_KEY = 'java_app'
+        SONAR_PROJECT_NAME = 'JAVA'
+        SONAR_LOGIN = credentials('sonar')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    sh 'rm -rf java_app'
+                    sh 'git clone https://github.com/antonio-projects-studio/java_app.git'
+                }
+            }
+        }
+
+        stage('Init libs') {
+            steps {
+                dir('java_app') {
+                    script {
+                        sh 'apt-get update'
+                        sh 'apt install -y maven'
+                    }
+                }
+            }
+        }
+
+        stage('Build App') {
+            steps {
+                dir('java_app') {
+                    script {
+                        sh 'mvn clean install -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('Allure') {
+            steps {
+                dir('java_app') {
+                    script {
+                        sh 'mvn clean test'
+                    }
+                }
+            }
+            post {
+                always {
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        properties: [],
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'java_app/allure-results']]
+                    ])
+                }
+            }
+        }
+
+        stage('SonarQube') {
+            steps {
+                dir('java_app') {
+                    withSonarQubeEnv('SQ') {
+                        sh '''
+                            mvn sonar:sonar \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                            -Dsonar.projectName=${SONAR_PROJECT_NAME} \
+                            -Dsonar.login=${SONAR_LOGIN}
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Init Docker') {
+            steps {
+                script {
+                    sh 'apt-get update'
+                    sh 'apt-get install -y docker.io'
+                    sh 'systemctl enable docker'
+                    sh 'dockerd > /dev/null 2>&1 &'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('java_app') {
+                    script {
+                        sh 'docker build -t antonioprojects/java_app:latest .'
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                dir('java_app') {
+                    script {
+                        withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                            sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
+                        }
+                        sh 'docker push antonioprojects/java_app:latest'
+                    }
+                }
+            }
+        }
+    }
+}

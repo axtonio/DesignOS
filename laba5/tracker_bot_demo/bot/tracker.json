@@ -1,0 +1,113 @@
+{
+	"task_types": [
+		{
+			"name": "TASK",
+			"button": "Задачи",
+			"reg_button": "Оформление задачи",
+			"ru": "задача",
+			"many": "задачи",
+			"path": "Путь задачи",
+			"task_schemas": "null"
+		},
+		{
+			"name": "REQUEST",
+			"button": "Заявки",
+			"reg_button": "Оформление заявки",
+			"ru": "заявка",
+			"many": "заявки",
+			"path": "Путь заявки",
+			"task_schemas": [
+				{
+					"allow": [
+						"отдел снабжения",
+						"босс"
+					],
+					"path": [
+						{
+							"node_id": 0,
+							"router": "босс",
+							"request": "check",
+							"back_id": "null",
+							"dependent_id": "null",
+							"request_media": [
+								"any"
+							],
+							"subscribers": [
+								"отдел снабжения",
+								"закупка"
+							]
+						},
+						{
+							"node_id": 1,
+							"router": "закупка",
+							"request": "execute",
+							"back_id": "null",
+							"dependent_id": 0,
+							"request_media": [
+								"photo",
+								"document"
+							],
+							"subscribers": [
+								"технический директор",
+								"босс"
+							]
+						},
+						{
+							"node_id": 2,
+							"router": "технический директор",
+							"request": "execute",
+							"back_id": "null",
+							"dependent_id": 1,
+							"request_media": [
+								"document",
+								"text"
+							],
+							"subscribers": [
+								"босс",
+								"закупка"
+							]
+						},
+						{
+							"node_id": 3,
+							"router": "босс",
+							"request": "check",
+							"back_id": 1,
+							"dependent_id": 2,
+							"request_media": [
+								"any"
+							],
+							"subscribers": [
+								"технический директор",
+								"закупка"
+							]
+						},
+						{
+							"node_id": 4,
+							"router": "бухгалтерия",
+							"request": "execute",
+							"back_id": "null",
+							"dependent_id": 3,
+							"request_media": [],
+							"subscribers": []
+						},
+						{
+							"node_id": 5,
+							"router": "allow",
+							"request": "execute",
+							"back_id": "null",
+							"dependent_id": 4,
+							"request_media": [
+								"photo",
+								"document"
+							],
+							"subscribers": [
+								"бухгалтерия",
+								"закупка"
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

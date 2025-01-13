@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tracker-bot-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: app 
+    spec:
+      containers:
+      - name: bot
+        image: antonioprojects/tracker_demo_bot:latest
+        volumeMounts:
+          - mountPath: /backend
+            name: backend
+            readOnly: true
+      - name: postgres
+        image: postgres:latest
+        env:
+          - name: POSTGRES_USER
+            value: "admin"
+          - name: POSTGRES_PASSWORD
+            value: "admin"
+          - name: POSTGRES_DB
+            value: "postgres"
+        ports:
+          - containerPort: 5432
+      volumes:
+        - name: backend
+          hostPath:
+            path: /minikubeContainer/tg_backend/
+            type: Directory 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

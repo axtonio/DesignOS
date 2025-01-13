@@ -1,0 +1,1 @@
+telemipt @ git+ssh://git@github.com/antonio-projects-studio/telemipt.git@3adbfa0695bbc60df2a2d3f945704eb1b7034e2b

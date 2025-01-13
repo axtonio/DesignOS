@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tracker-bot
+  labels:
+    app: bot
+spec:
+  containers:
+    - name: bot
+      image: antonioprojects/tracker_demo_bot:latest
+      volumeMounts:
+        - mountPath: /backend
+          name: backend
+  volumes:
+    - name: backend
+      hostPath:
+        path: /minikubeContainer/tg_backend/
+        type: Directory 

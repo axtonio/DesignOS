@@ -1,0 +1,46 @@
+services:
+
+  app1:
+    build:
+      context: ./app
+    ports:
+      - 7775:7773
+    networks:
+      local_network:
+        ipv4_address: 172.20.0.2
+
+  app2:
+    build:
+      context: ./app
+    ports:
+      - 7774:7773
+    networks:
+      local_network:
+        ipv4_address: 172.20.0.3
+
+  ansible:
+    build:
+      context: ./ansible
+    volumes:
+      - ${HOME}/.ssh/:/root/.ssh/
+      - ./ansible:/ansible/
+    command:
+      - sh
+      - -c
+      - |
+        cd ansible && \
+        ansible-playbook main.yml 
+    networks:
+      local_network:
+        ipv4_address: 172.20.0.4
+    depends_on:
+      - app1
+      - app2
+
+networks:
+  local_network:
+    driver: bridge
+    name: local_network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

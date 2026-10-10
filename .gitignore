@@ -4,3 +4,6 @@
 # Local generated files
 .DS_Store
 *.py[cod]
+
+# Generated runtime artifacts
+*.log
